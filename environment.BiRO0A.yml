@@ -1,0 +1,32 @@
+channels:
+  - conda-forge
+dependencies:
+  - boost=1.78.0.*
+  - boost-cpp=1.78.0.*
+  - clang=15.*
+  - clangxx=15.*
+  - cmake
+  - cppcheck
+  - cython
+  - doxygen
+  - gcc_linux-64=12.*
+  - gcc_linux-64=12.*
+  - gxx_linux-64=12.*
+  - gxx_linux-64=12.*
+  - hdf5=1.12.2.*
+  - ipython
+  - llvm-tools=15.*
+  - make
+  - matplotlib-base
+  - numpy=1.21.*
+  - pillow
+  - python=3.10.*=*_cpython
+  - python=3.10.*=*_cpython
+  - pyyaml
+  - rapidjson
+  - rsync
+  - sqlite=3.*
+  - texlive-core
+  - wxpython
+  - yaml-cpp
+  - zlib=1.2.*

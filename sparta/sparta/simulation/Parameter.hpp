@@ -28,6 +28,7 @@
 #include "sparta/utils/Printing.hpp"
 #include "sparta/utils/VectorUtils.hpp"
 #include "sparta/kernel/PhasedObject.hpp"
+#include <pybind11/pybind11.h>
 
 /*!
  * \file Parameter.hpp
@@ -757,6 +758,9 @@ namespace sparta
             string_quote_ = s;
             return old;
         }
+
+        // pyset
+        virtual void pyset(const pybind11::object& data) = 0;
 
     protected:
 
@@ -2529,6 +2533,13 @@ namespace sparta
         struct Dimensionality<T, typename std::enable_if<!is_vector<T>::value>::type> {
             enum { value = 0 }; // T is a scalar type, with 0 dimensions
         };
+
+        // interface for python parameter set
+    public:
+        void pyset(const pybind11::object& data) override{
+            *this = data.cast<ValueType>();
+        }
+        
 
     }; // class Parameter
 
