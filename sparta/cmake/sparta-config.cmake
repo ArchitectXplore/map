@@ -12,7 +12,7 @@
 #
 ################################################################################
 
-option (COMPILE_WITH_PYTHON "Compile in Python support" ON)
+option (COMPILE_WITH_PYTHON "Compile in Python support" OFF)
 
 # Find Boost
 set (_BOOST_COMPONENTS date_time iostreams serialization timer program_options)

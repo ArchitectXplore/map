@@ -208,11 +208,13 @@ set (CPPCHECK_EXCLUDES
 find_package (Cppcheck)
 
 add_library (sparta ${SourceCppFiles})
-target_link_libraries(sparta PRIVATE pybind11::headers)
+target_link_libraries(sparta PRIVATE pybind11::headers Python3::Python)
 
 # Add local includes
 target_include_directories (sparta PUBLIC "./")
 target_include_directories (sparta PUBLIC "simdb/include")
+target_include_directories (sparta PUBLIC "simdb/include")
+target_include_directories (sparta PUBLIC ${Python3_INCLUDE_DIRS})
 
 set (SPARTA_STATIC_LIBS ${PROJECT_BINARY_DIR}/libsparta.a)
 set (SPARTA_CMAKE_MACRO_PATH ${SPARTA_BASE}/cmake)
