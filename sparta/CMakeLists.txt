@@ -11,8 +11,6 @@ set (SPARTA_BASE ${CMAKE_CURRENT_SOURCE_DIR})
 include (${SPARTA_BASE}/cmake/sparta-config.cmake)
 # add pybind
 add_subdirectory(../../../ext/pybind11 ./pybind11)
-execute_process(COMMAND python3 -m pybind11 --includes OUTPUT_VARIABLE PYTHON_INC)
-message(STATUS ${PYTHON_INC})
 
 # Add the source for libsparta.a
 list (APPEND SourceCppFiles
@@ -209,6 +207,7 @@ set (CPPCHECK_EXCLUDES
 find_package (Cppcheck)
 
 add_library (sparta ${SourceCppFiles})
+target_link_libraries(sparta PRIVATE pybind11::headers)
 
 # Add local includes
 target_include_directories (sparta PUBLIC "./")

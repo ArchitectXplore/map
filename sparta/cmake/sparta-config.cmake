@@ -12,6 +12,8 @@
 #
 ################################################################################
 
+option (COMPILE_WITH_PYTHON "Compile in Python support" ON)
+
 # Find Boost
 set (_BOOST_COMPONENTS date_time iostreams serialization timer program_options)
 if (COMPILE_WITH_PYTHON)
@@ -92,7 +94,7 @@ endif ()
 #
 # Python support
 #
-option (COMPILE_WITH_PYTHON "Compile in Python support" OFF)
+
 if (COMPILE_WITH_PYTHON)
   # Bring in the python library and include files
   find_package (Python 3.0 REQUIRED COMPONENTS Development)
