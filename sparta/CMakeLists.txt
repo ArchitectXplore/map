@@ -9,8 +9,6 @@ set (GEN_DEBUG_INFO ON CACHE BOOL "Genearate debug info in compile & link -g")
 
 set (SPARTA_BASE ${CMAKE_CURRENT_SOURCE_DIR})
 include (${SPARTA_BASE}/cmake/sparta-config.cmake)
-# add pybind
-add_subdirectory(../../../ext/pybind11 ./pybind11)
 
 # Add the source for libsparta.a
 list (APPEND SourceCppFiles
@@ -206,6 +204,10 @@ set (CPPCHECK_EXCLUDES
   ${SPARTA_BASE}/test
 )
 find_package (Cppcheck)
+
+# Pybind11 Support
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(pybind11 REQUIRED)
 
 add_library (sparta ${SourceCppFiles})
 target_link_libraries(sparta PRIVATE pybind11::headers Python3::Python)
