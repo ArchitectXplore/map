@@ -42,6 +42,7 @@ list (APPEND SourceCppFiles
             src/MessageSource.cpp
             src/Parameter.cpp
             src/Port.cpp
+            src/PortVec.cpp
             src/RegisterSet.cpp
             src/Report.cpp
             src/ReportDescriptor.cpp

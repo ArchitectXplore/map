@@ -13,7 +13,7 @@
 #include <unordered_map>
 
 #include "sparta/ports/Port.hpp"
-
+#include "sparta/ports/PortVec.hpp"
 namespace sparta
 {
 
@@ -31,7 +31,7 @@ namespace sparta
 
         //! Convenience typedef
         typedef std::unordered_map<std::string, Port *> RegisteredPortMap;
-
+        typedef std::unordered_map<std::string, PortVec *> RegisteredPortVecMap;
         /**
          * \brief Construct a PortSet with a given parent.  The parent can be nullptr
          * \param parent The parent of this PortSet
@@ -55,6 +55,18 @@ namespace sparta
             }
             //Throw an exception if we could not find the port.
             throw SpartaException("The port with the name : " + named_port + " could not be found");
+            return nullptr;
+        }
+
+        PortVec * getPortVec(const std::string & named_port_vec) const {
+            for(uint32_t i = 0; i < Port::Direction::N_DIRECTIONS; ++i) {
+                auto found_port = registered_port_vecs_[i].find(named_port_vec);
+                if(found_port != registered_port_vecs_[i].end()) {
+                    return found_port->second;
+                }
+            }
+            //Throw an exception if we could not find the port.
+            throw SpartaException("The portVec with the name : " + named_port_vec + " could not be found");
             return nullptr;
         }
 
@@ -106,10 +118,14 @@ namespace sparta
             return registered_ports_[direction];
         }
 
+        RegisteredPortVecMap & getPortVecs(Port::Direction direction) {
+            return registered_port_vecs_[direction];
+        }
+
     private:
         //! The registered ports within this PortSet
         RegisteredPortMap registered_ports_[static_cast<uint32_t>(Port::Direction::N_DIRECTIONS)];
-
+        RegisteredPortVecMap registered_port_vecs_[static_cast<uint32_t>(Port::Direction::N_DIRECTIONS)];
         /*!
          * \brief React to a child registration
          *
@@ -128,6 +144,14 @@ namespace sparta
                     << getLocation();
             }
 
+            PortVec* port_vec = dynamic_cast<PortVec*>(child);
+            if(nullptr != port_vec){
+                sparta_assert(registered_port_vecs_[port_vec->getDirection()].count(port_vec->getName()) == 0,
+                                  "ERROR: PortVec '" << port_vec->getName() << "' already registered");
+                registered_port_vecs_[port_vec->getDirection()][port_vec->getName()] = port_vec;
+                return;
+            }
+
             Port* port = dynamic_cast<Port*>(child);
             if(nullptr != port){
                 sparta_assert(registered_ports_[port->getDirection()].count(port->getName()) == 0,
@@ -138,7 +162,7 @@ namespace sparta
 
             throw SpartaException("Cannot add TreeNode child ")
                 << child->getName() << " to PortSet " << getLocation()
-                << " because the child is not a Port or derivative";
+                << " because the child is not a Port, PortVec or derivative";
         }
 
     };

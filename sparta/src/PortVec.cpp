@@ -1,16 +1,13 @@
-// <Port.cpp> -*- C++ -*-
+// <PortVec.cpp> -*- C++ -*-
 
 
 #include "sparta/ports/Port.hpp"
 
 #include "sparta/ports/PortSet.hpp"
 
-#include "sparta/ports/PortVec.hpp"
-
-void sparta::Port::ensureParentIsPortSet_(TreeNode * parent)
+void sparta::PortVec::ensureParentIsPortSet_(TreeNode * parent)
 {
-    if((dynamic_cast<sparta::PortSet*>(parent) != nullptr) || 
-        (dynamic_cast<sparta::PortVec*>(parent) != nullptr)) {
+    if(dynamic_cast<sparta::PortSet*>(parent) != nullptr) {
         return;
     }
     throw SpartaException("Port ") << getLocation()
