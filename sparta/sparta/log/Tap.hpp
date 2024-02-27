@@ -5,6 +5,9 @@
 #include <iostream>
 #include <vector>
 
+#include <pybind11/pybind11.h>
+#include <pybind11/iostream.h>
+
 #include "sparta/simulation/TreeNode.hpp"
 #include "sparta/log/categories/CategoryManager.hpp"
 #include "sparta/utils/StringManager.hpp"
@@ -27,12 +30,11 @@ namespace sparta
         class Tap
         {
         public:
-
             //! Disallow copy construction
-            Tap(const Tap&) = delete;
+            Tap(const Tap &) = delete;
 
             //! Disallow copy assignment
-            Tap& operator=(const Tap&) = delete;
+            Tap &operator=(const Tap &) = delete;
 
             /*!
              * \brief Constructor
@@ -53,15 +55,15 @@ namespace sparta
              * \endcode
              */
             template <typename DestT>
-            Tap(TreeNode* node, const std::string* pcategory, DestT& dest) :
-                node_(node),
-                category_(pcategory)
+            Tap(TreeNode *node, const std::string *pcategory, DestT &dest) : node_(node),
+                                                                             category_(pcategory)
             {
-                Destination* d = DestinationManager::getDestination(dest); // Can instantiate new
+                Destination *d = DestinationManager::getDestination(dest); // Can instantiate new
                 sparta_assert(d != nullptr);
                 dest_ = d;
 
-                if(nullptr == node){
+                if (nullptr == node)
+                {
                     throw SpartaException("Cannot attach a Tap to a null TreeNode");
                 }
 
@@ -79,8 +81,7 @@ namespace sparta
              * \endcode
              */
             template <typename DestT>
-            Tap(TreeNode* node, const std::string& category, DestT& dest) :
-                Tap(node, StringManager::getStringManager().internString(category), dest)
+            Tap(TreeNode *node, const std::string &category, DestT &dest) : Tap(node, StringManager::getStringManager().internString(category), dest)
             {
                 // Initialization handled in delegated constructor
             }
@@ -100,11 +101,10 @@ namespace sparta
              * \endcode
              */
             template <typename DestT>
-            Tap(const std::string& category, DestT& dest) :
-                node_(nullptr),
-                category_(StringManager::getStringManager().internString(category))
+            Tap(const std::string &category, DestT &dest) : node_(nullptr),
+                                                            category_(StringManager::getStringManager().internString(category))
             {
-                Destination* d = DestinationManager::getDestination(dest); // Can instantiate new
+                Destination *d = DestinationManager::getDestination(dest); // Can instantiate new
                 sparta_assert(d != nullptr);
                 dest_ = d;
             }
@@ -113,7 +113,8 @@ namespace sparta
              * \brief Destructor
              * \note Does not affect destination
              */
-            virtual ~Tap() {
+            virtual ~Tap()
+            {
                 detach();
             }
 
@@ -125,17 +126,18 @@ namespace sparta
              * behaves like detach.
              * \note Destination and category were set in constructor
              */
-            void reset(TreeNode* node) {
+            void reset(TreeNode *node)
+            {
                 detach();
 
-                if(nullptr != node){
+                if (nullptr != node)
+                {
                     node_wptr_ = node->getWeakPtr();
 
                     // Use the form of the registration command which can ignore the no-notification-source case
                     TreeNodePrivateAttorney::registerForNotification<sparta::log::Message,
-                        typename std::remove_reference<decltype(*this)>::type,
-                        &std::remove_reference<decltype(*this)>::type::send_>
-                        (node_wptr_.lock().get(), this, *category_, false);
+                                                                     typename std::remove_reference<decltype(*this)>::type,
+                                                                     &std::remove_reference<decltype(*this)>::type::send_>(node_wptr_.lock().get(), this, *category_, false);
                 }
             }
 
@@ -147,22 +149,27 @@ namespace sparta
              * This method exists to stop observing without having to delete any
              * dynamically allocated taps.
              */
-            void detach() {
-                if(!node_wptr_.expired()){
+            void detach()
+            {
+                if (!node_wptr_.expired())
+                {
                     auto shared = node_wptr_.lock();
-                    if(shared){ // Check if reset
+                    if (shared)
+                    { // Check if reset
                         TreeNodePrivateAttorney::deregisterForNotification<sparta::log::Message,
                                                                            typename std::remove_reference<decltype(*this)>::type,
                                                                            &std::remove_reference<decltype(*this)>::type::send_>(shared.get(),
                                                                                                                                  this, *category_);
                     }
-                }else{
+                }
+                else
+                {
                     // Warn that the target node already expired before this tap was destructed
                     // Note that this is one of the only things that cannot be logged because
                     // it can happen at a time when there is all taps that may observe it are being
                     // destroyed. This it not a real issue, but everyone should be aware that it can
                     // happen.
-                    //std::cerr << "Warning: Tap of category \"" << *category_ << "\" and destination "
+                    // std::cerr << "Warning: Tap of category \"" << *category_ << "\" and destination "
                     //          << dest_->stringize() << " is detaching from an already-expired node"
                     //          << std::endl;
                 }
@@ -170,19 +177,23 @@ namespace sparta
                 node_wptr_.reset(); // Clears content
             }
 
-            const std::string* getCategoryID() const {
+            const std::string *getCategoryID() const
+            {
                 return category_;
             }
 
-            const std::string& getCategoryName() const {
+            const std::string &getCategoryName() const
+            {
                 return *category_;
             }
 
-            const Destination* getDestination() const {
+            const Destination *getDestination() const
+            {
                 return dest_;
             }
 
-            Destination* getDestination() {
+            Destination *getDestination()
+            {
                 return dest_;
             }
 
@@ -193,7 +204,8 @@ namespace sparta
              * This is the number of messages forwarded to a destination by
              * this tap.
              */
-            uint64_t getNumMessages() const {
+            uint64_t getNumMessages() const
+            {
                 return num_msgs_;
             }
 
@@ -202,7 +214,8 @@ namespace sparta
              * \note This node may have been deleted. To ensure this is safe,
              * use isObservedNodeExpired
              */
-            TreeNode* getObservedNode() const {
+            TreeNode *getObservedNode() const
+            {
                 return node_;
             }
 
@@ -210,12 +223,12 @@ namespace sparta
              * \brief Checks if the node at which this tap is observing has been
              * deleted (i.e. its weak reference has expired)
              */
-            bool isObservedNodeExpired() const {
+            bool isObservedNodeExpired() const
+            {
                 return node_wptr_.expired();
             }
 
         protected:
-
             /*!
              * \brief Actually send the notification
              * \param origin Node from which this notification (log message)
@@ -231,9 +244,10 @@ namespace sparta
              * this function must not access the observation_point argument
              * because it may not exist
              */
-            void send_(const TreeNode& origin,
-                       const TreeNode& obs_pt_DO_NOT_USE,
-                       const Message& msg) {
+            void send_(const TreeNode &origin,
+                       const TreeNode &obs_pt_DO_NOT_USE,
+                       const Message &msg)
+            {
                 (void)origin;
                 (void)obs_pt_DO_NOT_USE;
 
@@ -243,12 +257,11 @@ namespace sparta
             }
 
         private:
-
-            TreeNode* node_;
-            TreeNode::WeakPtr node_wptr_; //!< Weak reference to the TreeNode on which this tap is registered
-            const std::string* const category_; //!< From a CategoryManager
-            Destination* dest_; //!< Destination object used by this tap.
-            uint64_t num_msgs_ = 0; //!< Number of messages seen of the appropriate category (and thus forwardad) by this tap
+            TreeNode *node_;
+            TreeNode::WeakPtr node_wptr_;       //!< Weak reference to the TreeNode on which this tap is registered
+            const std::string *const category_; //!< From a CategoryManager
+            Destination *dest_;                 //!< Destination object used by this tap.
+            uint64_t num_msgs_ = 0;             //!< Number of messages seen of the appropriate category (and thus forwardad) by this tap
         };
 
         /*!
@@ -257,21 +270,21 @@ namespace sparta
         class TapDescriptor
         {
         public:
-
-            TapDescriptor(const std::string& _loc_pattern,
-                          const std::string& _category,
-                          const std::string& _destination) :
-                loc_pattern_(_loc_pattern),
-                category_(_category),
-                dest_(_destination)
-            { }
+            TapDescriptor(const std::string &_loc_pattern,
+                          const std::string &_category,
+                          const std::string &_destination) : loc_pattern_(_loc_pattern),
+                                                             category_(_category),
+                                                             dest_(_destination)
+            {
+            }
 
             // Allow copies and assignment (needed for vector)
-            TapDescriptor(const TapDescriptor&) = default;
-            TapDescriptor& operator=(const TapDescriptor&) = default;
+            TapDescriptor(const TapDescriptor &) = default;
+            TapDescriptor &operator=(const TapDescriptor &) = default;
 
             // Pretty print
-            std::string stringize() const {
+            std::string stringize() const
+            {
                 std::stringstream ss;
                 ss << "Tap location_pattern=\"" << loc_pattern_ << "\" (category=\"" << category_
                    << "\") -> file: \"" << dest_ << "\"";
@@ -300,7 +313,6 @@ namespace sparta
             void setBadPattern(bool bad) const { has_bad_pattern_ = bad; }
 
         private:
-
             // Node location string (pattern) on which tap should be placed
             std::string loc_pattern_;
 
@@ -329,17 +341,71 @@ namespace sparta
          * counted
          * \retur Vector of unused tap descriptors
          */
-        inline std::vector<const log::TapDescriptor*> getUnusedTaps(const log::TapDescVec& taps) {
-            std::vector<const log::TapDescriptor*> unused_taps;
-            for(const TapDescriptor& td : taps){
-                if(td.getUsageCount() == 0){
+        inline std::vector<const log::TapDescriptor *> getUnusedTaps(const log::TapDescVec &taps)
+        {
+            std::vector<const log::TapDescriptor *> unused_taps;
+            for (const TapDescriptor &td : taps)
+            {
+                if (td.getUsageCount() == 0)
+                {
                     unused_taps.push_back(&td);
                 }
             }
             return unused_taps;
         }
 
+
+        /*!
+         * \brief A Tap that can be used from Python.
+         *
+         * This class is a thin wrapper around the C++ Tap class that allows it to
+         * be used from Python. It creates a new Tap object in the constructor,
+         * and deletes it in the destructor.
+         */
+        class __attribute__((visibility("hidden"))) PyTap
+        {
+        public:
+            PyTap(TreeNode *node, const std::string *pcategory, pybind11::object &dest)
+            {
+                myCategory = new std::string(*pcategory);
+                try
+                {
+                    std::string t = dest.cast<std::string>();
+                    myTap = new Tap(node, myCategory, t);
+                }
+                catch (...)
+                {
+                    myBuffer = new pybind11::detail::pythonbuf(dest);
+                    myStream = new std::ostream(myBuffer);
+                    myTap = new Tap(node, myCategory, *myStream);
+                }
+            };
+            ~PyTap()
+            {
+                if (myTap != nullptr)
+                    delete myTap;
+                if (myStream != nullptr)
+                    delete myStream;
+                if (myBuffer != nullptr)
+                    delete myBuffer;
+                if (myCategory != nullptr)
+                    delete myCategory;
+            };
+            void detach()
+            {
+                myTap->detach();
+            };
+            void reset(TreeNode *node)
+            {
+                myTap->reset(node);
+            }
+
+        protected:
+            Tap *myTap;
+            std::ostream *myStream;
+            pybind11::detail::pythonbuf *myBuffer;
+            std::string *myCategory;
+        };
+
     } // namespace log
 } // namespace sparta
-
-
