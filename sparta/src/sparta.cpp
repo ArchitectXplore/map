@@ -152,6 +152,7 @@ namespace sparta {
     };
 
     const Scheduler::Tick Scheduler::INDEFINITE = 0xFFFFFFFFFFFFFFFFull;
+    std::mutex SleeperThread::sleeper_thread_mutex_;
     std::unique_ptr<sparta::SleeperThreadBase> SleeperThread::sleeper_thread_;
 
     namespace pevents {

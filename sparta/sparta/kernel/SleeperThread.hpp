@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <mutex>
+
 #include "sparta/kernel/SleeperThreadBase.hpp"
 
 namespace sparta{
@@ -203,8 +205,11 @@ public:
      */
     static SleeperThreadBase* getInstance()
     {
-        if (sleeper_thread_ == nullptr) {
-            sleeper_thread_.reset(new SleeperThread);
+        {
+            std::lock_guard<std::mutex> lock(sleeper_thread_mutex_);
+            if (sleeper_thread_ == nullptr) {
+                sleeper_thread_.reset(new SleeperThread);
+            }
         }
         return sleeper_thread_.get();
     }
@@ -401,6 +406,7 @@ public:
 
 private:
 
+    static std::mutex sleeper_thread_mutex_; //! Used to protect the singleton instance.
     static std::unique_ptr<SleeperThreadBase> sleeper_thread_; //! Hold the singleton instance
     std::vector<const Scheduler*> schedulers_; //! A list of scheduler's we check up on
     std::vector<uint64_t> prev_ticks_; //! The previous tick from the last time we slept for the scheduler's we are checking on.
