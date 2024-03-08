@@ -50,6 +50,9 @@ requirements:
     - ipython
     - boost
   host:  # target-arch buildtime deps
+    - pybind11
+    - pybind11-stubgen
+    - libacl
     - boost-cpp
     - yaml-cpp
     - sqlite
@@ -70,6 +73,8 @@ requirements:
     - wxpython
     - ipython
     # duplicate required host libs to make it easier to script creation of run environent
+    - pybind11
+    - pybind11-stubgen
     - boost-cpp
     - yaml-cpp
     - sqlite
