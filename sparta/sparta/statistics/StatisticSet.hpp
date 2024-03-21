@@ -16,9 +16,9 @@
 #include "sparta/utils/SpartaException.hpp"
 #include "sparta/utils/SpartaAssert.hpp"
 
-
 namespace sparta
 {
+    class HistogramTreeNode;
     /*!
      * \brief Set of StatisticDef and CounterBase-derived objects for
      * visiblility through a sparta Tree
@@ -32,6 +32,9 @@ namespace sparta
 
         //! Type for holding Counters
         typedef std::vector<CounterBase*> CounterVector;
+
+        //! Type for holding HistogramTreeNodes
+        typedef std::vector<HistogramTreeNode*> HistogramTnVector;
 
         //! \brief Name of all StatisticSet nodes
         static constexpr char NODE_NAME[] = "stats";
@@ -232,6 +235,48 @@ namespace sparta
             return *((CounterT *)owned_ctrs_.back().get());
         }
 
+        /*!
+         * \brief Gets the vector of HistogramTreeNodes contained by this set.
+         */
+        uint32_t getNumHistograms() const {
+            return hists_.size();
+        }
+
+        /*!
+         * \brief Gets the vector of HistogramTreeNodes contained by this set.
+         * \note There is no non-const version of this method. Modifying this
+         * vector externally should never be allowed.
+         */
+        const HistogramTnVector& getHistograms() const {
+            return hists_;
+        }
+
+        /*!
+         * \brief Retrieves a child that is a HistogramTreeNode with the given
+         * dotted path.
+         * \note no pattern matching supported in this method
+         * \warn This method should be considered slow. Cache histograms of
+         * interest instead of looking them up in performance-critical code.
+         * \throw SpartaException if child which is a histogram is not found
+         */
+        const HistogramTreeNode* getHistogram(const std::string& name) const;
+        //  {
+            // return getChildAs<HistogramTreeNode>(name);
+        // }
+
+        /*!
+         * \brief Retrieves a child that is a HistogramTreeNode with the given
+         * dotted path.
+         * \note no pattern matching supported in this method
+         * \warn This method should be considered slow. Cache histograms of
+         * interest instead of looking them up in performance-critical code.
+         * \throw SpartaException if child which is a histogram is not found
+         */
+        HistogramTreeNode* getHistogram(const std::string& name) ;
+        // {
+            // return getChildAs<HistogramTreeNode>(name);
+        // }
+
         ////////////////////////////////////////////////////////////////////////
         //! @}
 
@@ -247,31 +292,39 @@ namespace sparta
          *
          * Overrides TreeNode::onAddingChild_
          */
-        virtual void onAddingChild_(TreeNode* child) override {
-            if(isFinalized()){
-                throw SpartaException("Cannot add a child Counter once a StatisticSet is finalized. "
-                                    "Error with: ")
-                    << getLocation();
-            }
+        virtual void onAddingChild_(TreeNode* child) override;
+        // {
+        //     if(isFinalized()){
+        //         throw SpartaException("Cannot add a child Counter once a StatisticSet is finalized. "
+        //                             "Error with: ")
+        //             << getLocation();
+        //     }
 
-            StatisticDef* stat = dynamic_cast<StatisticDef*>(child);
-            if(nullptr != stat){
-                // Add stat to stats_ list for tracking.
-                stats_.push_back(stat);
-                return;
-            }
+        //     StatisticDef* stat = dynamic_cast<StatisticDef*>(child);
+        //     if(nullptr != stat){
+        //         // Add stat to stats_ list for tracking.
+        //         stats_.push_back(stat);
+        //         return;
+        //     }
 
-            CounterBase* ctr = dynamic_cast<CounterBase*>(child);
-            if(nullptr != ctr){
-                // Add Counter to ctrs_ list for tracking.
-               ctrs_.push_back(ctr);
-               return;
-            }
+        //     CounterBase* ctr = dynamic_cast<CounterBase*>(child);
+        //     if(nullptr != ctr){
+        //         // Add Counter to ctrs_ list for tracking.
+        //        ctrs_.push_back(ctr);
+        //        return;
+        //     }
 
-            throw SpartaException("Cannot add TreeNode child ")
-                << child->getName() << " to StatisticSet " << getLocation()
-                << " because the child is not a CounterBase or StatisticDef";
-        }
+        //     HistogramTreeNode* hist = dynamic_cast<HistogramTreeNode*>(child);
+        //     if(nullptr != hist){
+        //         // Add Histogram to hists_ list for tracking.
+        //         hists_.push_back(hist);
+        //         return;
+        //     }
+
+        //     throw SpartaException("Cannot add TreeNode child ")
+        //         << child->getName() << " to StatisticSet " << getLocation()
+        //         << " because the child is not a CounterBase or StatisticDef";
+        // }
 
         /*!
          * \brief Vector of unique pointers to statistics
@@ -309,6 +362,11 @@ namespace sparta
          * This is a superset of owned_ctrs_
          */
         CounterVector ctrs_;
+
+        /*!
+         * \brief Histogram associated with this set. May be null.
+         */
+        HistogramTnVector hists_;
     };
 
 } // namespace sparta

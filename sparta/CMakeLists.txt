@@ -62,6 +62,7 @@ list (APPEND SourceCppFiles
             src/SingleUpdateReport.cpp
             src/SINodeHierarchy.cpp
             src/StatisticDef.cpp
+            src/StatisticSet.cpp
             src/StatisticInstance.cpp
             src/StatisticsArchives.cpp
             src/StatisticsStreams.cpp
